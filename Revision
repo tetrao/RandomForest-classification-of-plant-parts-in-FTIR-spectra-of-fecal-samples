@@ -1,1 +1,0 @@
-This file contains the revised R Script (including sample-grouped cross-validation of hyperparameter optimization and variable importance analysis, automatic tranfer of HPO results to final model and VIP analysis and saving of final model as .rds) aswell as the correspnding FTIR data (fecal samples from IBK, now inlcuding date per sample).
