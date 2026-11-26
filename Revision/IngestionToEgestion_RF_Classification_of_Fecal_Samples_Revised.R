@@ -8,7 +8,7 @@
 
 rm(list=ls())
 
-setwd("") # Adapt path
+setwd("https://raw.githubusercontent.com/tetrao/RandomForest-classification-of-plant-parts-in-FTIR-spectra-of-fecal-samples/refs/heads/main/Revision") # Adapt path
 
 ##### Packages #####
 library(ranger)
@@ -156,7 +156,7 @@ aggregate_bands_df <- function(df,
 
 ##### Application of Feature Aggregation ####
 
-data <- fread("C:/Users/schae/Desktop/FWF Grouse/Feeding Experiment FK IBK/Revision/data/IBK_L_raw_FTIR_data.csv", header=TRUE, dec=",", sep=";", stringsAsFactors = FALSE)
+data <- fread("https://raw.githubusercontent.com/tetrao/RandomForest-classification-of-plant-parts-in-FTIR-spectra-of-fecal-samples/refs/heads/main/Revision/IBK_L_raw_FTIR_data.csv", header=TRUE, dec=",", sep=";", stringsAsFactors = FALSE)
 data <- as.data.frame(data)
 
 # Ungefilterte Kopie (inkl. Mischfutter) fuer den Carry-over-Test am Ende des Skripts
@@ -261,7 +261,7 @@ test_set <- test_set %>% rename(part = y_test)
 #### Set hyperparameters automatically ####
 USE_HPO_BEST    <- FALSE    
 TIE_TOL         <- 0.005   
-MANUAL_MTRY     <- 1    # Optimal  
+MANUAL_MTRY     <- 1    # Optimal 
 MANUAL_MIN_NODE <- 1    # Optimal (performs better than the value from the HPO  (50), leaves are rarely classified with a high min.node.size)
 N_TREES_FINAL   <- 1000
 MODEL_FILE      <- "RF_final_model.rds"
