@@ -261,8 +261,8 @@ test_set <- test_set %>% rename(part = y_test)
 #### Set hyperparameters automatically ####
 USE_HPO_BEST    <- FALSE    
 TIE_TOL         <- 0.005   
-MANUAL_MTRY     <- 1    # Optimal 
-MANUAL_MIN_NODE <- 1    # Optimal (performs better than the value from the HPO  (50), leaves are rarely classified with a high min.node.size)
+MANUAL_MTRY     <- 1    # optimized 
+MANUAL_MIN_NODE <- 1    # selected from HPO list (performs better than the value from the HPO  (50), leaves are rarely classified with a high min.node.size)
 N_TREES_FINAL   <- 1000
 MODEL_FILE      <- "RF_final_model.rds"
 
