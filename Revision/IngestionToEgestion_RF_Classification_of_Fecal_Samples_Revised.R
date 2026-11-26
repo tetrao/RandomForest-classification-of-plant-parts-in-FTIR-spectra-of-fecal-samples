@@ -1,6 +1,14 @@
+# Revision - Nopp-Mayr et. al
+# From ingestion to egestion:
+# Benchmarking FTIR spectroscopy and microscopy for identifying plant dietary components
+# in feces from feeding trials 
+
+# R Script for Band Aggregation, Random Forest Classification of plant parts in spectra of fecal samples (including sample-grouped cross-validation for hyperparameter optimzation and variable importance analysis)
+
+
 rm(list=ls())
 
-setwd("C:/USers/schae/Desktop/FWF Grouse/Feeding Experiment FK IBK/SkriptTest") # Adapt path
+setwd("") # Adapt path
 
 ##### Packages #####
 library(ranger)
