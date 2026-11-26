@@ -1,8 +1,3 @@
-#______________________________________________________________________________#
-# Systematische Unterschiede zwischen zwei Fütterungsperioden
-# Minimalversion: Permutationstest auf Feature- UND Vollspektrum-Ebene (ohne Plots)
-#______________________________________________________________________________#
-
 rm(list = ls())
 library(tidyverse)
 library(cluster)
@@ -16,7 +11,7 @@ FEED_SP_COL   <- "sp"
 DATE_COL      <- "date"
 BLOCK_COL     <- "feeding_block"
 MAX_GAP_DAYS  <- 3
-RUN_LABEL     <- "Trocknungstest"
+RUN_LABEL     <- "comparison of drying periods"
 SEED          <- 7
 
 PERIOD_MAP <- list(
@@ -108,7 +103,7 @@ parse_date <- function(x) {
   for (f in c("%Y-%m-%d","%d.%m.%Y","%d.%m.%y","%d/%m/%Y","%Y/%m/%d","%m/%d/%Y")) {
     d <- as.Date(x, format = f); if (all(!is.na(d[x != ""]))) return(d)
   }
-  stop("Datum nicht lesbar.")
+  stop("Date not readable")
 }
 data[[BLOCK_COL]]   <- trimws(as.character(data[[BLOCK_COL]]))
 data[[FEED_SP_COL]] <- trimws(as.character(data[[FEED_SP_COL]]))
@@ -129,7 +124,7 @@ norm_sp <- function(x) sub("\\.$", "", tolower(gsub("\\s+", " ", trimws(x))))
 is_drop <- norm_sp(data$species) %in% norm_sp(drop_species)
 data <- data[data$part %in% keep_parts & !is_drop, ]
 stopifnot(nrow(data) > 0)
-cat("Verbleibende Spektren:", nrow(data), "\n")
+cat("Remaining spectra:", nrow(data), "\n")
 
 ##### Spektren: Artefaktregion entfernen, dann SNV ############################
 spec_cols <- grep("^X?[0-9]+([.,][0-9]+)?$", names(data), value = TRUE)
@@ -168,9 +163,9 @@ uebersicht <- id_info %>% count(futter, periode) %>%
   pivot_wider(names_from = periode, values_from = n, values_fill = 0, names_prefix = "ids_")
 futter_beide <- uebersicht %>%
   filter(ids_P1 >= MIN_IDS_PER_PERIOD, ids_P2 >= MIN_IDS_PER_PERIOD) %>% pull(futter)
-cat("Futter in beiden Perioden:", length(futter_beide), "-",
+cat("Food in both periods:", length(futter_beide), "-",
     paste(futter_beide, collapse = ", "), "\n")
-if (length(futter_beide) == 0) stop("Kein Futter in beiden Perioden.")
+if (length(futter_beide) == 0) stop("No food in both periods.")
 
 ####### Generische Analyse-Funktion (ohne Plots) ##############################
 sil_futter_g <- function(prof_mat, info, futter_vec) {
@@ -222,8 +217,8 @@ run_period_analysis <- function(X_feat, ID_vec, info, futter_vec, label) {
   pval <- function(o, null) (1 + sum(null >= o)) / (length(null) + 1)
   
   test <- tibble(
-    statistik = c("Silhouette nach Periode (innerhalb Futter)",
-                  "Abstand der Periodenmittelwerte (innerhalb Futter)"),
+    statistik = c("Silhouette per reriod (within food)",
+                  "Distance of period means (within food)"),
     beobachtet = c(obs, obs_dist),
     null_mittel = c(mean(perm_sil), mean(perm_dist)),
     null_q95 = c(quantile(perm_sil, 0.95), quantile(perm_dist, 0.95)),
@@ -247,7 +242,7 @@ run_period_analysis <- function(X_feat, ID_vec, info, futter_vec, label) {
     mutate(p_permutation = band_p[feature],
            p_bh = p.adjust(p_permutation, method = "BH")) %>%
     arrange(p_permutation, desc(abs(mittlere_differenz)))
-  cat("\nFeatures: Differenz P2 - P1 (", label, ") - Top 15:\n", sep = "")
+  cat("\nFeatures: Difference P2 - P1 (", label, ") - Top 15:\n", sep = "")
   print(as.data.frame(head(band_sum, 15)), digits = 3, row.names = FALSE)
   
   invisible(list(test = test, band_sum = band_sum))
@@ -255,9 +250,9 @@ run_period_analysis <- function(X_feat, ID_vec, info, futter_vec, label) {
 
 ##### Beide Ebenen rechnen ####################################################
 res_features <- run_period_analysis(X_all,       ID, id_info, futter_beide, "Features")
-res_vollspek <- run_period_analysis(spectra_snv, ID, id_info, futter_beide, "Vollspektrum")
+res_vollspek <- run_period_analysis(spectra_snv, ID, id_info, futter_beide, "Full-Spectrum")
 
 ##### Gegenüberstellung #######################################################
-cat("\n### Gegenueberstellung beider Ebenen ###\n")
+cat("\n### Comparison of both levels ###\n")
 print(as.data.frame(bind_rows(res_features$test, res_vollspek$test)),
       digits = 3, row.names = FALSE)
