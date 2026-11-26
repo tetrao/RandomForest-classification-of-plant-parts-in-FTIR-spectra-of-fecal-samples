@@ -93,7 +93,7 @@ aggregate_bands_df <- function(df, meta_cols, bands = make_default_bands()) {
 }
 
 ##### Daten laden ##############################################################
-setwd("C:/Users/schae/Desktop/FWF Grouse/Feeding Experiment FK IBK/Revision/data")
+setwd("https://raw.githubusercontent.com/tetrao/RandomForest-classification-of-plant-parts-in-FTIR-spectra-of-fecal-samples/refs/heads/main/Revision") # Adapt path
 data <- read.csv("IBK_L_raw_FTIR_data.csv", header = TRUE, dec = ",",
                  sep = ";", stringsAsFactors = FALSE)
 
