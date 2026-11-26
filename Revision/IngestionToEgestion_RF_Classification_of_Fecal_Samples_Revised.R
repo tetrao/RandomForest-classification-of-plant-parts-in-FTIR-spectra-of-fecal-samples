@@ -3,7 +3,9 @@
 # Benchmarking FTIR spectroscopy and microscopy for identifying plant dietary components
 # in feces from feeding trials 
 
-# R Script for Band Aggregation, Random Forest Classification of plant parts in spectra of fecal samples (including sample-grouped cross-validation for hyperparameter optimzation and variable importance analysis)
+# R Script for Feature Aggregation and Random Forest Classification of plant parts in spectra of fecal samples 
+# including sample-grouped cross-validation for hyperparameter optimzation and variable importance analysis
+# including carryover analysis between consecutive feeding blocks (feature level and full-spectrum level)
 
 
 rm(list=ls())
