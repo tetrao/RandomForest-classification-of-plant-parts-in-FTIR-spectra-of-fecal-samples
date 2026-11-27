@@ -359,6 +359,60 @@ saveRDS(list(model = rf_model, features = colnames(X_all), classes = levels(part
              bands = make_default_bands(), train_ids = train_ids, hpo = cv_results),
         MODEL_FILE)
 
+# --- Performance on sample-level  ---
+sample_df <- tibble(ID   = result$ID[test_idx],
+                    wahr = as.character(test_set$part),
+                    pred = as.character(predictions$predictions)) %>%
+  group_by(ID, wahr) %>%
+  summarise(n_spektren = n(),
+            anteil_spektren_korrekt = mean(pred == wahr),
+            pred_sample = names(which.max(table(pred))),   # bei Gleichstand: alphabetisch erste Klasse
+            .groups = "drop")
+
+cm_sample <- confusionMatrix(factor(sample_df$pred_sample, levels = levels(part)),
+                             factor(sample_df$wahr,        levels = levels(part)))
+print(cm_sample$table)
+cm_sample$byClass[, c("Sensitivity", "Precision", "F1")]    # Recall, Precision, F1 je Klasse
+
+bal_acc <- function(p, t) mean(sapply(unique(t), function(k) mean(p[t == k] == k)))
+macro_f <- function(p, t) mean(sapply(unique(t), function(k) {
+  tp <- sum(p == k & t == k); fp <- sum(p == k & t != k); fn <- sum(p != k & t == k)
+  if (tp == 0) 0 else 2 * tp / (2 * tp + fp + fn) }))
+
+
+
+# --- Cluster-Bootstrap over IDs  ---
+kappa_fun <- function(p, t) {
+  cm <- table(factor(p, levels = levels(part)), factor(t, levels = levels(part)))
+  n  <- sum(cm)
+  po <- sum(diag(cm)) / n
+  pe <- sum(rowSums(cm) * colSums(cm)) / n^2
+  if (pe == 1) return(NA_real_)
+  (po - pe) / (1 - pe)
+}
+
+set.seed(7)
+boot <- replicate(2000, {
+  s <- sample_df[sample(nrow(sample_df), replace = TRUE), ]
+  c(accuracy_sample     = mean(s$pred_sample == s$wahr),
+    balanced_acc_sample = bal_acc(s$pred_sample, s$wahr),
+    macro_f1_sample     = macro_f(s$pred_sample, s$wahr),
+    kappa_sample        = kappa_fun(s$pred_sample, s$wahr),     # NEU
+    accuracy_spectra  = sum(s$anteil_spektren_korrekt * s$n_spektren) / sum(s$n_spektren))
+})
+
+obs <- c(accuracy_sample     = mean(sample_df$pred_sample == sample_df$wahr),
+         balanced_acc_sample = bal_acc(sample_df$pred_sample, sample_df$wahr),
+         macro_f1_sample     = macro_f(sample_df$pred_sample, sample_df$wahr),
+         kappa_sample        = kappa_fun(sample_df$pred_sample, sample_df$wahr),  # NEU
+         accuracy_spectr  = sum(sample_df$anteil_spektren_korrekt * sample_df$n_spektren) / sum(sample_df$n_spektren))
+
+ergebnis <- cbind(beobachtet = obs, t(apply(boot, 1, quantile, c(0.025, 0.975))))
+print(round(ergebnis, 3))
+
+ergebnis["accuracy_sample", ]
+cm_sample$overall["Kappa"]
+
 
 #### Evaluate variable importance ##### 
 
